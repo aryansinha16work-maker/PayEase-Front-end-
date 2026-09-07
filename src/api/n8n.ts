@@ -5,7 +5,7 @@ import { invoices, vendors, transactions, cashFlowSeries, taxOutlook } from '../
 import { Invoice, Vendor, Transaction, CashFlowPoint } from '../types'
 const INVOICES_WEBHOOK_URL = 'https://aryan1612.app.n8n.cloud/webhook/payease-invoices'
 const VENDORS_WEBHOOK_URL = ''
-const TAX_OUTLOOK_WEBHOOK_URL = ''
+const TAX_OUTLOOK_WEBHOOK_URL = 'https://aryan1612.app.n8n.cloud/webhook/payease-tax-outlook'
 const CASH_FLOW_WEBHOOK_URL = ''
 const APPROVE_INVOICE_WEBHOOK_URL = ''
 const ADD_TRANSACTION_WEBHOOK_URL = ''
@@ -23,7 +23,14 @@ export async function getVendors(): Promise<Vendor[]> {
   return new Promise((resolve) => setTimeout(() => resolve(vendors), 300))
 }
 export async function getTaxOutlook() {
-  return new Promise((resolve) => setTimeout(() => resolve(taxOutlook), 300))
+  try {
+    const res = await fetch(TAX_OUTLOOK_WEBHOOK_URL)
+    if (!res.ok) throw new Error('Failed to load tax outlook')
+    return await res.json()
+  } catch (err) {
+    console.error('getTaxOutlook failed, falling back to mock data:', err)
+    return taxOutlook
+  }
 }
 export async function getCashFlow(): Promise<CashFlowPoint[]> {
   return new Promise((resolve) => setTimeout(() => resolve(cashFlowSeries), 300))
