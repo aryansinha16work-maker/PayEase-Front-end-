@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ArrowDownRight, ArrowUpRight, Clock } from 'lucide-react'
-import { getInvoices, getTaxOutlook } from '../api/n8n'
-import { Invoice } from '../types'
+import { getInvoices, getTaxOutlook, getTransactions } from '../api/n8n'
+import { Invoice, Transaction } from '../types'
 import { ExplainTooltip } from '../components/ExplainTooltip'
 
 function formatINR(n: number) {
@@ -10,14 +10,17 @@ function formatINR(n: number) {
 
 export function Home() {
   const [invoices, setInvoices] = useState<Invoice[]>([])
+  const [transactions, setTransactions] = useState<Transaction[]>([])
   const [outlook, setOutlook] = useState<any>(null)
 
   useEffect(() => {
     getInvoices().then(setInvoices)
     getTaxOutlook().then(setOutlook)
+    getTransactions().then(setTransactions)
   }, [])
 
   const payable = invoices.filter((i) => !i.paid).reduce((sum, i) => sum + i.amount, 0)
+  const receivable = transactions.filter((t) => t.type === 'receivable').reduce((sum, t) => sum + t.amount, 0)
   const dueSoon = invoices.filter((i) => i.daysUntilDue <= 3 && !i.paid)
   const needsAttention = invoices.filter((i) => i.status !== 'cleared' && i.status !== 'pending-approval')
 
@@ -45,7 +48,7 @@ export function Home() {
             <ArrowDownRight size={14} className="text-teal" />
             Receivable this month
           </div>
-          <div className="font-display text-2xl font-semibold tabular-nums text-ink">{formatINR(150000)}</div>
+          <div className="font-display text-2xl font-semibold tabular-nums text-ink">{formatINR(receivable)}</div>
         </div>
         <div className="rounded-lg border border-line bg-surface p-5">
           <div className="mb-2 flex items-center gap-1.5 text-xs font-medium text-inksoft">

@@ -10,6 +10,7 @@ const CASH_FLOW_WEBHOOK_URL = 'https://aryan1612.app.n8n.cloud/webhook/payease-c
 const APPROVE_INVOICE_WEBHOOK_URL = 'https://aryan1612.app.n8n.cloud/webhook/payease-resolve-invoice'
 const ADD_TRANSACTION_WEBHOOK_URL = 'https://aryan1612.app.n8n.cloud/webhook/payease-add-transaction'
 const SETTLE_INVOICE_WEBHOOK_URL = 'https://aryan1612.app.n8n.cloud/webhook/payease-settle-invoice'
+const TRANSACTIONS_WEBHOOK_URL = 'https://aryan1612.app.n8n.cloud/webhook/payease-transactions'
 export async function getInvoices(): Promise<Invoice[]> {
   try {
     const res = await fetch(INVOICES_WEBHOOK_URL)
@@ -65,7 +66,14 @@ export async function settleInvoice(invoiceId: string): Promise<{ success: boole
   }
 }
 export async function getTransactions(): Promise<Transaction[]> {
-  return new Promise((resolve) => setTimeout(() => resolve(transactions), 300))
+  try {
+    const res = await fetch(TRANSACTIONS_WEBHOOK_URL)
+    if (!res.ok) throw new Error('Failed to load transactions')
+    return await res.json()
+  } catch (err) {
+    console.error('getTransactions failed, falling back to mock data:', err)
+    return transactions
+  }
 }
 export async function approveInvoice(invoiceId: string): Promise<{ success: boolean }> {
   try {
