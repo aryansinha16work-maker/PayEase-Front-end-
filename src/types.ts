@@ -15,6 +15,7 @@ export interface Invoice {
   explanation: string
   isMsme: boolean
   daysUntilDue: number
+  paid: boolean
 }
 
 export interface Vendor {

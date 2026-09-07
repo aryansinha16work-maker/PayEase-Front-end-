@@ -9,6 +9,7 @@ const TAX_OUTLOOK_WEBHOOK_URL = 'https://aryan1612.app.n8n.cloud/webhook/payease
 const CASH_FLOW_WEBHOOK_URL = 'https://aryan1612.app.n8n.cloud/webhook/payease-cashflow'
 const APPROVE_INVOICE_WEBHOOK_URL = 'https://aryan1612.app.n8n.cloud/webhook/payease-resolve-invoice'
 const ADD_TRANSACTION_WEBHOOK_URL = 'https://aryan1612.app.n8n.cloud/webhook/payease-add-transaction'
+const SETTLE_INVOICE_WEBHOOK_URL = 'https://aryan1612.app.n8n.cloud/webhook/payease-settle-invoice'
 export async function getInvoices(): Promise<Invoice[]> {
   try {
     const res = await fetch(INVOICES_WEBHOOK_URL)
@@ -47,6 +48,20 @@ export async function getCashFlow(): Promise<CashFlowPoint[]> {
   } catch (err) {
     console.error('getCashFlow failed, falling back to mock data:', err)
     return cashFlowSeries
+  }
+}
+export async function settleInvoice(invoiceId: string): Promise<{ success: boolean }> {
+  try {
+    const res = await fetch(SETTLE_INVOICE_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ invoiceId }),
+    })
+    if (!res.ok) throw new Error('Failed to settle invoice')
+    return await res.json()
+  } catch (err) {
+    console.error('settleInvoice failed:', err)
+    return { success: false }
   }
 }
 export async function getTransactions(): Promise<Transaction[]> {

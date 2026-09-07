@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { CheckCircle2 } from 'lucide-react'
-import { getInvoices, approveInvoice } from '../api/n8n'
+import { getInvoices, approveInvoice, settleInvoice } from '../api/n8n'
 import { Invoice, InvoiceStatus } from '../types'
 import { ExplainTooltip } from '../components/ExplainTooltip'
 
@@ -26,6 +26,11 @@ export function Invoices() {
   async function handleApprove(id: string) {
     await approveInvoice(id)
     setInvoices((prev) => prev.map((i) => (i.id === id ? { ...i, status: 'cleared' } : i)))
+  }
+
+  async function handleSettle(id: string) {
+    await settleInvoice(id)
+    setInvoices((prev) => prev.map((i) => (i.id === id ? { ...i, paid: true } : i)))
   }
 
   return (
@@ -76,6 +81,21 @@ export function Invoices() {
                       <CheckCircle2 size={13} />
                       Resolve
                     </button>
+                  )}
+                  {inv.status === 'cleared' && !inv.paid && (
+                    <button
+                      onClick={() => handleSettle(inv.id)}
+                      className="inline-flex items-center gap-1 rounded-md border border-line px-2.5 py-1.5 text-xs font-medium text-ink hover:border-teal hover:text-teal-deep"
+                    >
+                      <CheckCircle2 size={13} />
+                      Mark Paid
+                    </button>
+                  )}
+                  {inv.status === 'cleared' && inv.paid && (
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-teal-deep">
+                      <CheckCircle2 size={13} />
+                      Paid
+                    </span>
                   )}
                 </td>
               </tr>
