@@ -17,8 +17,8 @@ export function Home() {
     getTaxOutlook().then(setOutlook)
   }, [])
 
-  const payable = invoices.reduce((sum, i) => sum + i.amount, 0)
-  const dueSoon = invoices.filter((i) => i.daysUntilDue <= 3)
+  const payable = invoices.filter((i) => !i.paid).reduce((sum, i) => sum + i.amount, 0)
+  const dueSoon = invoices.filter((i) => i.daysUntilDue <= 3 && !i.paid)
   const needsAttention = invoices.filter((i) => i.status !== 'cleared' && i.status !== 'pending-approval')
 
   return (
