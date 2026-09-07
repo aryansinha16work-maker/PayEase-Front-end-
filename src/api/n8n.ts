@@ -6,7 +6,7 @@ import { Invoice, Vendor, Transaction, CashFlowPoint } from '../types'
 const INVOICES_WEBHOOK_URL = 'https://aryan1612.app.n8n.cloud/webhook/payease-invoices'
 const VENDORS_WEBHOOK_URL = 'https://aryan1612.app.n8n.cloud/webhook/payease-vendors'
 const TAX_OUTLOOK_WEBHOOK_URL = 'https://aryan1612.app.n8n.cloud/webhook/payease-tax-outlook'
-const CASH_FLOW_WEBHOOK_URL = ''
+const CASH_FLOW_WEBHOOK_URL = 'https://aryan1612.app.n8n.cloud/webhook/payease-cashflow'
 const APPROVE_INVOICE_WEBHOOK_URL = 'https://aryan1612.app.n8n.cloud/webhook/payease-resolve-invoice'
 const ADD_TRANSACTION_WEBHOOK_URL = 'https://aryan1612.app.n8n.cloud/webhook/payease-add-transaction'
 export async function getInvoices(): Promise<Invoice[]> {
@@ -40,7 +40,14 @@ export async function getTaxOutlook() {
   }
 }
 export async function getCashFlow(): Promise<CashFlowPoint[]> {
-  return new Promise((resolve) => setTimeout(() => resolve(cashFlowSeries), 300))
+  try {
+    const res = await fetch(CASH_FLOW_WEBHOOK_URL)
+    if (!res.ok) throw new Error('Failed to load cash flow')
+    return await res.json()
+  } catch (err) {
+    console.error('getCashFlow failed, falling back to mock data:', err)
+    return cashFlowSeries
+  }
 }
 export async function getTransactions(): Promise<Transaction[]> {
   return new Promise((resolve) => setTimeout(() => resolve(transactions), 300))
