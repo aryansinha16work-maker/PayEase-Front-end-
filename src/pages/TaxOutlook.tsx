@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import { getTaxOutlook } from '../api/n8n'
 import { ExplainTooltip } from '../components/ExplainTooltip'
+import { TaxOutlook as TaxOutlookType } from '../types'
 
 function formatINR(n: number) {
   return '₹' + n.toLocaleString('en-IN')
 }
 
 export function TaxOutlook() {
-  const [outlook, setOutlook] = useState<any>(null)
+  const [outlook, setOutlook] = useState<TaxOutlookType | null>(null)
 
   useEffect(() => {
     getTaxOutlook().then(setOutlook)
@@ -66,6 +67,48 @@ export function TaxOutlook() {
           <div className="mb-1 text-xs font-medium text-marigold">Provisional</div>
           <div className="font-display text-lg font-semibold tabular-nums text-ink">{formatINR(outlook.gstProvisional)}</div>
           <p className="mt-1 text-xs text-inksoft">Recorded internally; vendor filing not yet confirmed.</p>
+        </div>
+      </div>
+
+      <div className="mt-8">
+        <h2 className="mb-1 font-display text-lg font-semibold text-ink">TDS Classification by Invoice</h2>
+        <p className="mb-4 text-sm text-inksoft">Section applied to each invoice based on vendor category and filing status.</p>
+
+        <div className="overflow-hidden rounded-lg border border-line bg-surface">
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="border-b border-line text-xs text-inksoft">
+                <th className="px-4 py-3 font-medium">Vendor</th>
+                <th className="px-4 py-3 font-medium">Invoice #</th>
+                <th className="px-4 py-3 font-medium">Category</th>
+                <th className="px-4 py-3 font-medium">Amount</th>
+                <th className="px-4 py-3 font-medium">Section Applied</th>
+                <th className="px-4 py-3 font-medium">Rate</th>
+                <th className="px-4 py-3 font-medium">TDS Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(outlook.tdsBreakdown ?? []).map((row, idx) => (
+                <tr key={idx} className="border-b border-line last:border-0">
+                  <td className="px-4 py-3 font-medium text-ink">{row.vendor}</td>
+                  <td className="px-4 py-3 text-inksoft">{row.invoiceNumber}</td>
+                  <td className="px-4 py-3 text-inksoft">{row.category}</td>
+                  <td className="px-4 py-3 tabular-nums text-ink">{formatINR(row.amount)}</td>
+                  <td className="px-4 py-3">
+                    {row.category === 'Unclassified' ? (
+                      <span className="rounded-full bg-line px-2.5 py-1 text-xs font-medium text-inksoft">{row.section}</span>
+                    ) : row.section.includes('206AB') ? (
+                      <span className="font-medium text-brick">{row.section}</span>
+                    ) : (
+                      <span className="text-ink">{row.section}</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 tabular-nums text-inksoft">{row.ratePct}%</td>
+                  <td className="px-4 py-3 tabular-nums text-ink">{formatINR(row.tdsAmount)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

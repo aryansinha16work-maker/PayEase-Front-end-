@@ -43,3 +43,24 @@ export interface CashFlowPoint {
   projected: number
   threshold: number
 }
+
+export interface TaxOutlook {
+  period: string
+  gstPayable: number
+  gstConfirmed: number
+  gstProvisional: number
+  itcClaimable: number
+  tdsLiability: number
+  confidencePct: number
+  invoicesAccounted: number
+  invoicesExpected: number
+  tdsBreakdown: Array<{
+    vendor: string
+    invoiceNumber: string
+    category: string
+    amount: number
+    section: string
+    ratePct: number
+    tdsAmount: number
+  }>
+}

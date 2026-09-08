@@ -41,4 +41,10 @@ export const taxOutlook = {
   confidencePct: 78,
   invoicesAccounted: 23,
   invoicesExpected: 29,
+  tdsBreakdown: [
+    { vendor: 'Rane Fabrication Works', invoiceNumber: 'RFW-118', category: 'Contractor', amount: 56000, section: '194C', ratePct: 1, tdsAmount: 560 },
+    { vendor: 'Kotak Legal Associates', invoiceNumber: 'KLA-092', category: 'Professional Services', amount: 47200, section: '194J', ratePct: 10, tdsAmount: 4720 },
+    { vendor: 'Rane Fabrication Works', invoiceNumber: 'RFW-118', category: 'Contractor', amount: 56000, section: '206AB', ratePct: 2, tdsAmount: 1120 },
+    { vendor: 'Unknown Supplier', invoiceNumber: 'UNK-001', category: 'Unclassified', amount: 25000, section: 'Not determined', ratePct: 0, tdsAmount: 0 },
+  ],
 }
