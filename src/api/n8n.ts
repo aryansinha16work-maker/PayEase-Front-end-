@@ -11,6 +11,7 @@ const APPROVE_INVOICE_WEBHOOK_URL = 'https://aryan1612.app.n8n.cloud/webhook/pay
 const ADD_TRANSACTION_WEBHOOK_URL = 'https://aryan1612.app.n8n.cloud/webhook/payease-add-transaction'
 const SETTLE_INVOICE_WEBHOOK_URL = 'https://aryan1612.app.n8n.cloud/webhook/payease-settle-invoice'
 const TRANSACTIONS_WEBHOOK_URL = 'https://aryan1612.app.n8n.cloud/webhook/payease-transactions'
+const UPDATE_SETTINGS_WEBHOOK_URL = 'https://aryan1612.app.n8n.cloud/webhook/payease-update-settings'
 export async function getInvoices(): Promise<Invoice[]> {
   try {
     const res = await fetch(INVOICES_WEBHOOK_URL)
@@ -86,6 +87,20 @@ export async function approveInvoice(invoiceId: string): Promise<{ success: bool
     return await res.json()
   } catch (err) {
     console.error('approveInvoice failed:', err)
+    return { success: false }
+  }
+}
+export async function updateSafetyThreshold(value: number): Promise<{ success: boolean }> {
+  try {
+    const res = await fetch(UPDATE_SETTINGS_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ safetyThreshold: value }),
+    })
+    if (!res.ok) throw new Error('Failed to update threshold')
+    return await res.json()
+  } catch (err) {
+    console.error('updateSafetyThreshold failed:', err)
     return { success: false }
   }
 }

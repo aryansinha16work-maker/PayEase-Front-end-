@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, CartesianGrid } from 'recharts'
-import { getCashFlow } from '../api/n8n'
+import { getCashFlow, updateSafetyThreshold } from '../api/n8n'
 import { CashFlowPoint } from '../types'
 
 function formatINR(n: number) {
@@ -9,14 +9,30 @@ function formatINR(n: number) {
 
 export function CashFlow() {
   const [data, setData] = useState<CashFlowPoint[]>([])
+  const [thresholdInput, setThresholdInput] = useState<string>('')
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    getCashFlow().then(setData)
+    getCashFlow().then((d) => {
+      setData(d)
+      setThresholdInput(String(d[0]?.threshold ?? 0))
+    })
   }, [])
 
   const lowestPoint = data.length ? Math.min(...data.map((d) => d.projected)) : 0
   const threshold = data[0]?.threshold ?? 0
   const isTight = lowestPoint < threshold * 1.15
+
+  async function handleSaveThreshold() {
+    const value = Number(thresholdInput)
+    if (Number.isNaN(value)) return
+    setSaving(true)
+    await updateSafetyThreshold(value)
+    const fresh = await getCashFlow()
+    setData(fresh)
+    setThresholdInput(String(fresh[0]?.threshold ?? value))
+    setSaving(false)
+  }
 
   return (
     <div className="mx-auto max-w-4xl px-8 py-10">
@@ -30,6 +46,23 @@ export function CashFlow() {
           Projected cash dips close to your safety threshold in Week 3. Consider following up on pending receivables.
         </div>
       )}
+
+      <div className="mb-4 flex items-center gap-2 text-sm">
+        <label className="font-medium text-inksoft">Safety threshold (Rs.)</label>
+        <input
+          type="number"
+          value={thresholdInput}
+          onChange={(e) => setThresholdInput(e.target.value)}
+          className="w-32 rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-ink outline-none focus:border-teal"
+        />
+        <button
+          onClick={handleSaveThreshold}
+          disabled={saving}
+          className="rounded-md bg-teal px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-teal-deep disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          {saving ? 'Saving…' : 'Save'}
+        </button>
+      </div>
 
       <div className="rounded-lg border border-line bg-surface p-5">
         <ResponsiveContainer width="100%" height={280}>
