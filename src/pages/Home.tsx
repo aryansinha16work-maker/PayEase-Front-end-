@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { ArrowDownRight, ArrowUpRight, Clock } from 'lucide-react'
-import { getInvoices, getTaxOutlook, getTransactions } from '../api/n8n'
+import { ArrowDownRight, ArrowUpRight, Clock, Upload, FileText } from 'lucide-react'
+import { getInvoices, getTaxOutlook, getTransactions, uploadInvoiceFile } from '../api/n8n'
 import { Invoice, Transaction } from '../types'
 import { ExplainTooltip } from '../components/ExplainTooltip'
 
@@ -12,6 +12,9 @@ export function Home() {
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [outlook, setOutlook] = useState<any>(null)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const [uploadMessage, setUploadMessage] = useState('')
 
   useEffect(() => {
     getInvoices().then(setInvoices)
@@ -35,7 +38,7 @@ export function Home() {
         {outlook && <>Your estimated tax position stands at {formatINR(outlook.gstPayable)}.</>}
       </h1>
 
-      <div className="mb-8 grid grid-cols-3 gap-4">
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-lg border border-line bg-surface p-5">
           <div className="mb-2 flex items-center gap-1.5 text-xs font-medium text-inksoft">
             <ArrowUpRight size={14} className="text-brick" />
@@ -57,6 +60,52 @@ export function Home() {
           </div>
           <div className="font-display text-2xl font-semibold tabular-nums text-ink">{dueSoon.length} invoices</div>
         </div>
+      </div>
+
+      <div className="mb-8 rounded-lg border border-line bg-surface p-5">
+        <div className="mb-3 flex items-center gap-1.5 text-sm font-medium text-ink">
+          <Upload size={15} className="text-teal" />
+          Upload an invoice
+        </div>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <label className="flex w-full cursor-pointer items-center gap-2 rounded-md border border-line bg-paper px-3 py-2.5 text-sm text-inksoft hover:border-teal">
+            <FileText size={15} className="text-inksoft/60" />
+            <span className="truncate">
+              {selectedFile ? selectedFile.name : 'Choose a file (.pdf, .png, .jpg)'}
+            </span>
+            <input
+              type="file"
+              accept=".pdf,.png,.jpg,.jpeg"
+              onChange={(e) => {
+                setSelectedFile(e.target.files?.[0] ?? null)
+                setUploadMessage('')
+              }}
+              className="hidden"
+            />
+          </label>
+          <button
+            onClick={async () => {
+              if (!selectedFile) return
+              setUploading(true)
+              setUploadMessage('')
+              const result = await uploadInvoiceFile(selectedFile)
+              setUploading(false)
+              if (result.success) {
+                setUploadMessage("Invoice submitted. It'll appear in Invoices within about 30 seconds.")
+                setSelectedFile(null)
+              } else {
+                setUploadMessage('Upload failed. Please try again.')
+              }
+            }}
+            disabled={!selectedFile || uploading}
+            className="rounded-md bg-teal px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-teal-deep disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {uploading ? 'Uploading...' : 'Submit'}
+          </button>
+        </div>
+        {uploadMessage && (
+          <p className="mt-3 text-sm text-teal">{uploadMessage}</p>
+        )}
       </div>
 
       {needsAttention.length > 0 && (

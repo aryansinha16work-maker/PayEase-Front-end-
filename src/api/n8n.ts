@@ -12,6 +12,7 @@ const ADD_TRANSACTION_WEBHOOK_URL = 'https://aryan1612.app.n8n.cloud/webhook/pay
 const SETTLE_INVOICE_WEBHOOK_URL = 'https://aryan1612.app.n8n.cloud/webhook/payease-settle-invoice'
 const TRANSACTIONS_WEBHOOK_URL = 'https://aryan1612.app.n8n.cloud/webhook/payease-transactions'
 const UPDATE_SETTINGS_WEBHOOK_URL = 'https://aryan1612.app.n8n.cloud/webhook/payease-update-settings'
+const WEB_UPLOAD_WEBHOOK_URL = 'https://aryan1612.app.n8n.cloud/webhook/payease-web-upload'
 export async function getInvoices(): Promise<Invoice[]> {
   try {
     const res = await fetch(INVOICES_WEBHOOK_URL)
@@ -115,6 +116,21 @@ export async function addTransaction(tx: Omit<Transaction, 'id' | 'source'>): Pr
     return await res.json()
   } catch (err) {
     console.error('addTransaction failed:', err)
+    return { success: false }
+  }
+}
+export async function uploadInvoiceFile(file: File): Promise<{ success: boolean }> {
+  try {
+    const formData = new FormData()
+    formData.append('Invoice_File', file)
+    const res = await fetch(WEB_UPLOAD_WEBHOOK_URL, {
+      method: 'POST',
+      body: formData,
+    })
+    if (!res.ok) throw new Error('Failed to upload invoice')
+    return { success: true }
+  } catch (err) {
+    console.error('uploadInvoiceFile failed:', err)
     return { success: false }
   }
 }
