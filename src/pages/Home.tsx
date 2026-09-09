@@ -29,7 +29,7 @@ export function Home() {
 
   return (
     <div className="mx-auto max-w-4xl px-8 py-10">
-      <p className="mb-1 text-sm text-inksoft">Tuesday, 8 September</p>
+      <p className="mb-1 text-sm text-inksoft">{new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
       <h1 className="mb-8 font-display text-2xl font-semibold leading-snug text-ink">
         You have {formatINR(payable)} payable across {invoices.length} invoices this month.
         {dueSoon.length > 0 && (
